@@ -1,67 +1,99 @@
-# black-and-white
+# Black-and-White Image Colorization (OpenCV DNN)
 
-## Overview
+This repository contains a Jupyter notebook (`main.ipynb`) that colorizes a black-and-white (grayscale) image using OpenCV’s DNN module and a pre-trained Caffe colorization model.
 
-**black-and-white** is a project maintained by [willow788](https://github.com/willow788).  
-> *Replace this line with a one-sentence summary of the project’s purpose or functionality.*
+The notebook loads the model files, runs inference to predict the **a/b chrominance channels** in **LAB** color space, then converts the result back to **BGR** and displays the original image next to the colorized output.
 
-## Features
+---
 
-- Feature 1  
-- Feature 2  
-- Feature 3  
-*(List the main features/capabilities here)*
+## What’s inside
 
-## Installation
+- `main.ipynb` — end-to-end colorization workflow:
+  - loads a Caffe model (`.prototxt` + `.caffemodel`)
+  - loads cluster centers (`pts_in_hull.npy`)
+  - preprocesses an image into LAB space
+  - predicts the `ab` channels and reconstructs a full-color image
+  - displays a side-by-side comparison using `cv2.imshow`
 
-Clone the repository:
-```sh
-git clone https://github.com/willow788/black-and-white.git
+---
+
+## Requirements
+
+- Python 3.x
+- `opencv-python` (needs `cv2.dnn`)
+- `numpy`
+
+Example install:
+
+```bash
+pip install opencv-python numpy
 ```
 
-Install dependencies:
-```sh
-# Example with npm
-npm install
+---
 
-# Or for Python
-pip install -r requirements.txt
+## Model files expected
+
+The notebook expects these files to exist:
+
+- `Model/colorization_deploy_v2.prototxt`
+- `Model/colorization_release_v2.caffemodel`
+- `Model/pts_in_hull.npy`
+
+> Note: In the notebook, two paths use Windows-style backslashes:
+> - `Model\colorization_deploy_v2.prototxt`
+> - `Model\colorization_release_v2.caffemodel`
+>
+> If you are on macOS/Linux, change them to forward slashes (`Model/...`) or use `os.path.join(...)`.
+
+---
+
+## Input image
+
+By default, the notebook reads:
+
+- `paris.jpg`
+
+Place `paris.jpg` in the repository root (same folder as `main.ipynb`), or update the path in the notebook:
+
+```python
+img = cv2.imread('paris.jpg')
 ```
-> *Replace with accurate setup steps for your project.*
 
-## Usage
+---
 
-Example usage:
-```sh
-# Example command
-python main.py
+## How to run
 
-# Or
-npm start
+1. Ensure the model files are in the `Model/` directory (see above).
+2. Add your input image (default: `paris.jpg`) to the repo root.
+3. Open and run the notebook:
+
+```bash
+jupyter notebook main.ipynb
 ```
 
-## Project Structure
+4. Run all cells. A window titled **"Original and Colorised"** should appear showing the original image and the colorized version side-by-side.
 
+---
+
+## Output
+
+The notebook displays the result via an OpenCV GUI window:
+
+- left: original image
+- right: colorized image
+
+If you want to save the output instead of (or in addition to) displaying it, you can add something like:
+
+```python
+cv2.imwrite("colorized.png", colorised)
 ```
-black-and-white/
-├── src/
-├── tests/
-├── README.md
-└── ...
-```
-> *Describe main directories and files here if needed.*
 
-## Contributing
+---
 
-Pull requests are welcome! Please file an issue first to discuss proposed changes.  
-See [CONTRIBUTING.md](CONTRIBUTING.md) if available.
+## Notes / Troubleshooting
 
-## License
+- `cv2.imshow` requires a GUI environment. If you run this in a headless environment (some servers, some notebook environments), the window may not open.
+- The notebook resizes both images to `640x640` before stacking/displaying.
 
-Distributed under the MIT License.  
-See [`LICENSE`](LICENSE) for more information.
 
-## Contact
-
-Maintained by [willow788](https://github.com/willow788).  
-*Add contact information or links as appropriate.*
+This approach uses the widely shared OpenCV DNN colorization model architecture (Caffe-based) that predicts `ab` channels in LAB space from the `L` channel.
